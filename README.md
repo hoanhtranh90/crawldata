@@ -1,0 +1,2 @@
+# crawldata
+# truyenfull.vn
