@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.*;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/truyenfull")
 @CrossOrigin
 public class ApiController {
     @GetMapping("/{tentruyen}/{id}")
@@ -27,7 +27,7 @@ public class ApiController {
         if(datas == null) {
             return ResponseEntity.ok("truyen bi loi");
         }
-
+        
         HashMap<String, String> fullData = new HashMap<>();
         fullData.put("title", title.text());
 
@@ -144,22 +144,51 @@ public class ApiController {
     }
     @GetMapping("/{tentruyen}")
     public ResponseEntity<?> info(@PathVariable("tentruyen") String tentruyen) throws IOException {
-        String url = "https://truyenfull.vn/"+tentruyen+"/chuong-"+"/";
+        String url = "https://truyenfull.vn/"+tentruyen+"/";        
+
         Document doc = Jsoup.connect(url).get();
-        Element datas = doc.select("div.chapter-c").first();
-        String image = doc.select("div.books > div > img").first().attr("src");
-        System.out.println(image);
-
-
-        HashMap<String, String> fullData = new HashMap<>();
-        fullData.put("image", image);
+        Element content = doc.getElementById("total-page");      
+        
+        
+//        Elements getListDetai2 = getListChuong.get(0).getElementsByTag("a");
+        String totalPage = content.select("input").attr("value");
+        ArrayList<String> listChuong = new ArrayList<>();
+        for (int i = 1; i <= Integer.parseInt(totalPage); i++) {
+            String url1 = "https://truyenfull.vn/"+tentruyen+"/trang-"+i+"/";        
+            Document doc1 = Jsoup.connect(url1).get();
+            Elements getListChuong = doc1.getElementsByClass("list-chapter");
+            for (int k = 0; k < getListChuong.size(); k++) {
+                for (int j = 0; j < getListChuong.get(k).getElementsByAttribute("href").size(); j++) {
+               String url2 = getListChuong.get(k).getElementsByAttribute("href").get(j).attr("href");
+               listChuong.add(url2);
+            }  
+           }     
+        }
+//        ArrayList<HashMap<String, String>> last = new ArrayList<>();
+//        HashMap<String, String> fullData = new HashMap<>();
+////        for (int i = 0; i < listChuong.size(); i++) {
+//        for (int i = 0; i < 1; i++) {
+//            String url_n = listChuong.get(i);
+//            Document doc_n = Jsoup.connect(url_n).get();
+//            Element datas = doc_n.select("div.chapter-c").first();
+//            Element title = doc_n.getElementsByClass("truyen-title").first();
+//            Element chap = doc_n.getElementsByClass("chapter-title").first();
+//            if(datas == null) {
+//                return ResponseEntity.ok("truyen bi loi");
+//            }
+//            HashMap<String, String> fullDatax = new HashMap<>();
+//            fullDatax.put("title", title.text());
 //
-//        fullData.put("datas", datas.html());
-//
-//        fullData.put("chap", chap.text());
+//            fullDatax.put("datas", datas.html());
+//            String h = datas.html();
+//            fullDatax.put("chap", chap.text());
+//            last.add(fullDatax);
+//        }
+       
 
+//        return ResponseEntity.ok(last);
+            return ResponseEntity.ok(listChuong);
 
-        return ResponseEntity.ok(fullData);
 //        return ResponseEntity.ok(datas.select(">p").html());
     }
 
