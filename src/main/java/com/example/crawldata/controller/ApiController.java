@@ -147,10 +147,14 @@ public class ApiController {
         String url = "https://truyenfull.vn/"+tentruyen+"/";        
 
         Document doc = Jsoup.connect(url).get();
-        Element content = doc.getElementById("total-page");      
+        String title = doc.getElementsByTag("title").text();
+        Element content = doc.getElementById("total-page");          
+    
         
         
 //        Elements getListDetai2 = getListChuong.get(0).getElementsByTag("a");
+        String urlCheck = doc.getElementsByClass("list-chapter").get(0).getElementsByAttribute("href").get(0).attr("href");
+        if(urlCheck.contains("quyen")){
         String totalPage = content.select("input").attr("value");
         ArrayList<String> listChuong = new ArrayList<>();
         for (int i = 1; i <= Integer.parseInt(totalPage); i++) {
@@ -181,13 +185,33 @@ public class ApiController {
 //
 //            fullDatax.put("datas", datas.html());
 //            String h = datas.html();
-//            fullDatax.put("chap", chap.text());
+//            fullDatax.put("chap", chap.text()); 
+//            
+//
 //            last.add(fullDatax);
 //        }
        
 
 //        return ResponseEntity.ok(last);
             return ResponseEntity.ok(listChuong);
+        }
+        else {
+            String totalPage = content.select("input").attr("value");
+            ArrayList<String> listChuong = new ArrayList<>();
+            String url1 = "https://truyenfull.vn/"+tentruyen+"/trang-"+Integer.parseInt(totalPage)+"/";        
+            Document doc1 = Jsoup.connect(url1).get();
+            Elements getListChuong = doc1.getElementsByClass("list-chapter");
+            String urlLast = getListChuong.get(getListChuong.size()-1)
+                    .getElementsByAttribute("href")
+                    .get(getListChuong.get(getListChuong.size()-1)
+                    .getElementsByAttribute("href").size()-1).attr("href");
+            int count = Integer.parseInt(urlLast.replaceAll("[^0-9]", ""));
+            for (int i = 1; i <= count; i++) {
+             String urlv = "https://truyenfull.vn/"+tentruyen+"/chuong-"+i+"/"; 
+             listChuong.add(urlv); 
+            }
+            return ResponseEntity.ok(listChuong);
+        }
 
 //        return ResponseEntity.ok(datas.select(">p").html());
     }
